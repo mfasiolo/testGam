@@ -1,9 +1,15 @@
 Package: testGam
 Title: Testing mgcViz and qgam
 Version: 0.0.1
-Authors@R: c(person("Matteo", "Fasiolo", email = "matteo.fasiolo@gmail.com", role = c("aut", "cre")))
+Authors@R: c(person("Matteo", "Fasiolo", email = "matteo.fasiolo@gmail.com", role = c("aut", "cre")), 
+             person("Simon", "N. Wood", role = c("ctb")))
 Description: Testing mgcViz and qgam
-Imports: mgcViz, mgcFam, gamair, e1071, languageR, gridExtra
+Imports: mgcViz (>= 0.1.4), 
+         mgcFam, 
+         gamair, 
+         e1071, 
+         languageR, 
+         gridExtra
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

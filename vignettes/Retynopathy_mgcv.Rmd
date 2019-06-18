@@ -1,0 +1,83 @@
+---
+title: "Retinopathy among diabetics part 1: solution"
+author: "Matteo Fasiolo, Simon N. Wood"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Retynopathy_mgcv_1}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rgl)
+opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
+```
+
+```{r setup1, include=FALSE}
+# Set workdir to source file location and then
+library(RhpcBLASctl); blas_set_num_threads(1)
+```
+
+1) Load data and look at it:
+```{r ret1, message = F}
+library(testGam)
+library(mgcv)
+data("wesdr")
+
+pairs(wesdr)
+```
+
+2) Fit a logistic model with smooth effects for `dur` and `bmi`
+```{r fit_1, message = F}
+fit1 <- gam(ret ~ s(dur) + s(bmi), 
+             data=wesdr,
+             family=binomial())
+```
+
+Plot marginal effects:
+```{r plot_fit1, message = F, fig.width = 8, fig.height = 4}
+plot(fit1, pages = 1)
+```
+The effects do not look very strong, especially for high bmi, where the data is sparser. Let's look at the significance of the effects
+```{r summary_fit1, message = F}
+summary(fit1)
+```
+The p-value for `bmi` is quite high, hence one might consider removing this effect.
+
+3) Lets look at a QQ-plot of deviance residuals (the default residual type)
+```{r qq_gam, message = F, fig.width = 5, fig.height = 5}
+qq.gam(fit1, rep = 100, pch = 1)
+```
+where the reference intervals are generated using 100 simulated vectors of responses. It's quite difficult to interpret this plot for binary data, but the residuals are within the intervals, and we might conclude that the model is ok. But now, lets look at the residuals along the variable `gly`, which was not included in our fit
+```{r res_plot, message = F}
+plot(wesdr$gly, residuals(fit1, type = "deviance"))
+```
+It is quite clear that the residuals increase with `gly`. So we should consider including its effect in the model.
+
+4) Now we include the `gly` variable
+```{r ret6, message = F}
+fit2 <- gam(ret ~ s(dur) + s(bmi) + s(gly), 
+             data=wesdr,
+             family=binomial())
+summary(fit2)
+```
+Variable `gly` seems very important and, interestingly, now the effect of `bmi` is significant. Let's compare the two models in terms of AIC
+```{r AIC_comp, message = F}
+AIC(fit1, fit2)
+```
+The larger model seems to do better. Let's look at the estimated effects
+```{r plot_fit2, message = F, fig.width = 8.5, fig.height = 8}
+plot(fit2, pages = 1)
+```
+The effect of `gly` is strong but linear. We do some extra checks 
+```{r gam.check, message = F, fig.width = 8, fig.height = 8}
+par(mfrow = c(2, 2))
+gam.check(fit2)
+```
+The residual checks are not very informative for binary data, and `edf` is much lower than `k'` for all effects, so it does not make sense increasing the number of basis functions used. 
+

@@ -1,6 +1,6 @@
 ---
 title: "CO2 modelling: solution"
-author: "Matteo Fasiolo"
+author: "Matteo Fasiolo, Simon N. Wood"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -8,7 +8,7 @@ output:
     number_sections: true
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{co2}
+  %\VignetteIndexEntry{co2_mgcv}
   %\VignetteEncoding{UTF-8}
 ---
 

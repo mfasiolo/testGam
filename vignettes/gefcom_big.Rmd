@@ -16,7 +16,6 @@ vignette: >
 library(knitr)
 library(rgl)
 opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
-knit_hooks$set(webgl = hook_webgl)
 ```
 
 ```{r setup1, include=FALSE}
@@ -145,8 +144,8 @@ print(pl, pages = 1)
 
 Here we used `noiseup = TRUE` to add noise to the fitted surface, which gives an idea about the uncertainty in each effect. We also used `pTrans` to make so that the opacity of the heatmap is proportional to the statistical significance of the effect at each locations. We also set `too.far = -1` to avoid having grey areas far from design points, and we added a sub-sample of only 500 design points using `maxpo = 500`.
 
-The following code produces some RGL plots, here we show only the last on:
-```{r bam14, message = F, webgl=TRUE}
+The following code produces some RGL plots, here we show only the last one:
+```{r bam14, message = F}
 plotRGL(sm(fit3, 7), residuals = T)
 clear3d()
 plotRGL(sm(fit3, 8), residuals = T)
@@ -154,6 +153,7 @@ clear3d()
 plotRGL(sm(fit3, 9), residuals = T)
 clear3d()
 plotRGL(sm(fit3, 10), residuals = T)
+rglwidget()
 ```
 
 6. We can look at the variance as follows:

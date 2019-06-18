@@ -1,0 +1,133 @@
+---
+title: "Motorcycle accident: solution"
+author: "Matteo Fasiolo, Simon N. Wood"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{mcycle_mgcv}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include=FALSE}
+library(knitr)
+library(rgl)
+opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
+```
+
+```{r setup1, include=FALSE}
+# Set workdir to source file location and then
+library(RhpcBLASctl); blas_set_num_threads(1)
+```
+
+1) Load data and look at it
+```{r mcycle, message = F}
+library(MASS)
+library(mgcv)
+data("mcycle")
+
+head(mcycle, 10)
+
+plot(mcycle)
+```
+Nothing happens until around 15 milliseconds after the impact.
+
+2) We start with a simple Gaussian model
+```{r fit_G, message = F}
+fitG <- gam(accel ~ s(times), data = mcycle)
+```
+We now plot the fitted mean, with credible intervals, against the data 
+```{r fit_G_pred, message = F}
+plot(mcycle)
+pr <- predict(fitG, se = TRUE)
+lines(mcycle$times, pr$fit)
+lines(mcycle$times, pr$fit + 2*pr$se, col = 2)
+lines(mcycle$times, pr$fit - 2*pr$se, col = 2)
+```
+There are several problems with this fit, in particular a) the fit is wiggly where it should be quite flat (`times <  15` and `times >  35`) and b) the intervals have similar width for `times < 15` and for `times > 30` which is clearly inappropriate given that the variance of the residuals increases from left to right. In the following we try to address these issues.
+
+3) Let's look at some diagnostics
+```{r gam.check, message = F, fig.show = 'hide'}
+par(mfrow = c(2, 2))
+gam.check(fitG)
+```
+We start by considering the text output (the plots produced by `check.gam` have been hidden in this file). We see that `edf` is quite close to `k'`, which suggests that we should increase the number of basis function used. Hence we refit with `k = 20` and re-check
+```{r fit_G2, message = F, fig.show = 'hide'}
+fitG2 <- gam(accel ~ s(times, k = 20), data = mcycle)
+gam.check(fitG2)
+```
+Now `edf` is well below `k'`, and increasing `k` further seems unnecessary. 
+
+4) We try using an adaptive basis
+```{r fit_G2_ad, message = F, fig.show = 'hide'}
+fitG2_ad <- gam(accel ~ s(times, k = 20, bs = 'ad'), data = mcycle)
+gam.check(fitG2_ad)
+```
+Notice that `edf` has gone down, relative to the non-adaptive basis. This is because the adaptive basis is able to concentrate all the wiggliness where it is needed (time between 15 and 30 milliseconds), and it produces a nearly linear fit elsewhere. This can be seen by comparing the fitted effects
+```{r compare_fits, message = F, fig.width = 8.5, fig.height = 4}
+par(mfrow = c(1, 2))
+plot(fitG2)
+plot(fitG2_ad)
+```
+Using an adaptive smooth helped us removing some spurious wiggliness for `times > 35` (this was the first issue we mentioned above).
+
+5) Now we start looking at the model residuals
+```{r qqgam, message = F}
+qq.gam(fitG2_ad, rep = 100)
+```
+The QQ-plot does not look to bad. However, as we have said before, the data is clearly heteroscedastic. We can see this by looking at the log square residuals
+```{r resPlot, message = F}
+plot(mcycle$times, log(residuals(fitG2_ad)^2))
+```
+The variance of the residuals is clearly not constant. 
+
+6) We regress the log squared residuals on `times`,  we plot the effect of time on the log Mean Absolute Deviation (MAD)
+```{r fitRes, message = F}
+mcycle$res2 <- log( residuals(fitG2_ad, type = "response")^2 )
+fitRes <- gam(res2 ~ s(times), data = mcycle)
+plot(fitRes)
+``` 
+As expected the dispersion of the residuals increases with `times`. We obtain the variance by exponentiating the expected value of the log squared residuals and we re-fit with weights inversely proportional to the variance
+```{r weight_fit, message = F}
+w <- 1 / exp(fitRes$fitted.values) # 1 / variance
+fitG2_ad_w <- gam(accel ~ s(times, k = 20, bs = 'ad'), 
+                  weights = w,
+                  data = mcycle)
+``` 
+The confidence bands width now nicely changes with times, as can be seen in the following plots
+```{r predComp, message = F, fig.width = 8.5, fig.height = 4}
+par(mfrow = c(1, 2))
+plot(mcycle[ , c("times", "accel")], main = "Unweighted fit")
+pr <- predict(fitG2_ad, se = TRUE)
+lines(mcycle$times, pr$fit)
+lines(mcycle$times, pr$fit + 2*pr$se, col = 2)
+lines(mcycle$times, pr$fit - 2*pr$se, col = 2)
+
+plot(mcycle[ , c("times", "accel")], main = "Weighted fit")
+pr <- predict(fitG2_ad_w, se = TRUE)
+lines(mcycle$times, pr$fit)
+lines(mcycle$times, pr$fit + 2*pr$se, col = 2)
+lines(mcycle$times, pr$fit - 2*pr$se, col = 2)
+``` 
+
+
+6) We model mean and variance jointly using a Gaussian location scale model
+```{r gaulss_fit, message = F, fig.width = 8.5, fig.height = 4}
+fit_ls <- gam(list(accel ~ s(times, k=20, bs="ad"), ~s(times)),
+              data=mcycle, 
+              family=gaulss())
+
+plot(fit_ls, pages=1, scale=0)
+``` 
+
+
+```{r gaulss_pred, message = F}
+plot(mcycle[ , c("times", "accel")])
+pr <- predict(fit_ls, se = TRUE)
+lines(mcycle$times, pr$fit[ , 1])
+lines(mcycle$times, pr$fit[ , 1] + 2*pr$se[ , 1], col = 2)
+lines(mcycle$times, pr$fit[ , 1] - 2*pr$se[ , 1], col = 2)
+``` 

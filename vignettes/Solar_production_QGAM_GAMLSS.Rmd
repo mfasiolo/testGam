@@ -16,7 +16,6 @@ vignette: >
 library(knitr)
 library(rgl)
 opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
-knit_hooks$set(webgl = hook_webgl)
 ```
 
 ```{r setup1, include=FALSE}
@@ -37,12 +36,13 @@ DataTRAIN <- solar_prod[-iTest, ]
 ```
 
 2) Fit median quantile GAM and look at tensor effect:
-```{r dbbmi2, message = F, webgl=TRUE}
+```{r dbbmi2, message = F}
 fitQ <- qgamV(logprod ~ dow + te(Posan, Instant, bs = c("cc", "cc"), k = c(5, 5)),
                         data=DataTRAIN, qu = 0.5)
 
 
 plotRGL( sm(fitQ, 1), residuals = TRUE )
+rglwidget()
 ```
 The `rgl` plot shows a clear pattern in the residuals sign along `Instant`. 
 

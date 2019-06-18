@@ -74,12 +74,19 @@ suppressMessages(require(mgcv))
 suppressMessages(require(qgam))
 @
   
-\begin{center} {\large \bf First session: computer lab exercises}\end{center}
+\begin{center} {\large \bf GAM modelling workshop: computer lab exercises}\end{center}
 
-Assuming you have installed all the relevant software, you should get all the material for the workshop from \url{https://github.com/mfasiolo/workshop_EDF19}. Download it as a zip file and extract it. Set the working directory to the ``exercises'' subfolder, then you should be able to load any of the datasets by doing:
-<<setup1, echo = TRUE, cache=FALSE, eval=FALSE>>=
-load(file = "data/AnyOfTheDataSets.rda")
+\begin{center} {Matteo Fasiolo and Simon N. Wood} \end{center}
+
+The main packages we will need are \verb|mgcv|, \verb|mgcViz|, \verb|qgam| and \verb|mgcFam| which should have been installed by default by doing
+<<install_0, echo = TRUE, cache=FALSE, eval=FALSE>>=
+library(devtools)
+install_github("mfasiolo/mgcFam")
+install_github("mfasiolo/testGam")
 @
+
+All the data sets we will use in the workshop should now be available in your \verb|R| system.
+The rest of the material for the workshop can be downloaded from \url{https://github.com/mfasiolo/workshop_RSS19}. If you download it as a zip file and extract it, the the solutions can be found in the \verb|exercises/solutions| folder.
 
 % Please make sure that the following packages are installed:
 % \begin{enumerate}
@@ -89,21 +96,28 @@ load(file = "data/AnyOfTheDataSets.rda")
 % \item \verb+gamair+ (\verb+install.packages("gamair")+).
 % \end{enumerate}
 
-In this session you could try one or more of the following exercises on electricity demand forecasting:
+\section*{First session}
+
+In the first session you could try one or more of the following exercises (suggested track is ex 2, 1 and potentially 3, and the number of \textbf{*} indicates the difficulty level):
 \begin{enumerate}
-\item Forecasting electricity demand on GEFCom2014 data (solution in: ``gefcom\_small.html''). Simple exercise, featuring only 1D smooth effects on a relatively small data set.
-\item Big GAM modelling of GEFCom14 electricity demand data (sol: ``gefcom\_big.html''). Featuring Big Data GAM methods and 2D tensor interactions.
-\item Individual electricity demand modelling (solution in: ``Ind\_elect.html''). Featuring Big Data GAM methods and by-costumer smooth effects.
+\item Retinopathy among diabetics (sol: ``Retinopathy\_mgcv.html''). Simple exercise on basic GAM modelling in \verb|mgcv|. \textbf{*}
+\item Modelling the simulated motorcycle accident data set (solution in: ``motorcycle\_mgcv.html''). Pedagogical exercise, using a 1D example to illustrate adaptive smooths, heteroscedastic data and location-shape GAM models. \textbf{**}
+\item $\text{C0}_2$ modelling (sol: ``CO2\_mgcv.html''). Featuring cyclic seasonal smooths and the dangers of extrapolation. \textbf{**}
+\item Ozone modelling (sol: ``Ozone\_mgcv.html''). Exercise focusing on manual variable selection via p-values and residual checking, and adjusting the mean-variance relationship. \textbf{*}
 \end{enumerate}
 
-Otherwise you could try one of these other exercises, not focused on the electricity industry:
+\section*{Second session}
+
+In the second session you could try one or more of the following exercises:
 \begin{enumerate}
-\item[4.] Mackerel egg data (sol: ``Mackerel.html''). Featuring 2D spatial interactions.
-\item[5.] Bone mineral density modelling (sol: ``bone\_density.html''). Featuring simple random effects.
-\item[6.] Retinopathy among diabetics (sol: ``Retinopath.html''). Features 2D smooth interactions and automatic variable selection.
-\item[7.] $\text{C0}_2$ modelling (sol: ``CO2\_modelling.html''). Featuring cyclic seasonal smooths and the dangers of extrapolation.
-\item[8.] Ozone modelling (sol: ``Ozone.html''). Easy exercise, focusing on manual variable selection via p-values and residual checking.
-\item[9.] Larynx cancer in Germany (sol: ``Larinx.html''). Focused on spatial modelling using Markov Random Field effects.
+\setcounter{enumi}{4}
+\item Forecasting electricity demand on GEFCom2014 data (solution in: ``gefcom\_small\_mgcv.html''). Simple exercise, focused on models building using residual checks and using only 1D effects. \textbf{*}
+\item Larynx cancer in Germany (sol: ``Larynx\_mgcv.html''). Focused on spatial modelling using Markov Random Field, isotropic and tensor-product effects. \textbf{*}
+\item Retinopathy among diabetics part 2  (sol: ``Retinopath\_mgcv\_2.html''). Features 2D smooth interactions, automatic variable selection and the use of GCV vs REML for smoothing parameter selection. \textbf{**}
+\item Big GAM modelling of GEFCom14 electricity demand data (sol: ``gefcom\_big.html''). Featuring Big Data GAM methods and 2D tensor interactions.
+\item Individual electricity demand modelling (solution in: ``Ind\_elect.html''). Featuring Big Data GAM methods and by-costumer smooth effects.
+\item Mackerel egg data (sol: ``Mackerel.html''). Featuring 2D spatial interactions.
+\item Bone mineral density modelling (sol: ``bone\_density.html''). Featuring simple random effects.
 \end{enumerate}
 but feel free to try \verb|mgcv| and \verb|mgcViz| on your own data. 
 
@@ -113,6 +127,106 @@ Questions 4, 6, 7 and 9 have been adapted from Simon Wood's notes.
 
 %Apologies to the linguists, epidemiologists and hydrologists among you: if you see that the analyses I propose in the examples do not make sense scientifically, let me know and I will correct the examples for future workshops.
 
+\section{Retinopathy among diabetics: part 1} 
+
+Data frame {\tt wesdr} (taken from Chong Gu's \verb|gss| package) contains a subset of data from a Wisconsin study on development of retinopathy among diabetics. The following variables are provided:
+\begin{itemize}
+\item {\tt ret}, a binary indicator of development of retinopathy by first follow up of study.
+\item {\tt bmi}, the body mass index at entry to the study (between 18 and 25 is considered healthy).
+\item {\tt dur}, the duration of diabetes, in years, at entry.
+\item {\tt gly}, the percentage of glycosylated haemoglobin (HbA1C) in the blood (haemoglobin to which glucose has bound). 2.5-3.5\% is normal for non-diabetics. 6.5\% is generally considered good control for diabetics.
+\end{itemize}
+
+The aim is to model the probability of retinopathy as a function of the other variables.
+
+Questions:
+
+\begin{enumerate}
+\item Load \verb+testGam+, \verb+mgcv+ and the data (\verb+data(wesrd)+). Have a look at the relation between the different variables using \verb+pairs(wesdr)+ or other exploratory visualisations.
+
+\item Start by fitting a logistic regression model (\verb|family = binomial|), with smooth effects for duration and body mass index. Use \verb|summary| and \verb|plot| to verify whether the effects are strong.
+
+\item Use \verb|qq.gam| to get a QQ-plot of the residuals (you can set the \verb|rep| argument to, say, 100 to get simulation-based reference intervals). Is the plot interpretable? Now plot the residuals against the values of \verb|wesdr$gly|, do you see any pattern?
+
+\item Include a smooth effects for \verb|gly| in the model formula and refit. Looks at the fitted effects and verify their significance using \verb|plot| and \verb|summary|. Compare the new model to the first model you fitted using \verb|AIC|. Use \verb|gam.check| to produce further diagnostics. Does the text suggest that the you should modify the number of basis functions used? 
+ 
+\end{enumerate} %% end of retinopathy question
+
+\section{Simulated motorcycle accident} 
+
+Here we consider the classic simulated motorcycle accident data set from the \verb|MASS| package. The data frame gives a series of measurements of head acceleration in a simulated motorcycle accident, used to test crash helmets. See \verb|?mcycle| for details. 
+
+Questions:
+
+\begin{enumerate}
+\item Load \verb+mgcv+ and the data (\verb+library(MASS); data("mcycle")+). Have a look at the data using \verb|head| and a scatterplot.
+
+\item Fit a Gaussian GAM, with acceleration as response and a smooth effect for \verb|times|. Obtain the fitted values and corresponding standard errors using \verb|predict|, and plot the fitted values with confidence intervals on top of a scatterplot of acceleration vs time. Do you see any issues with this fit?
+
+\item Use \verb|gam.check| to get some diagnostics. Does the text output suggest that you should modify the number of basis function used? Try to increase the number of basis functions to 20, re-fit and re-check.
+
+\item Now re-fit the model, using an adaptive basis for the effect of time \verb|s(accel, k = 20, bs = 'ad')|. Use the \verb|gam.check| or \verb|summary| to check the number of EDF used. Has it changed relative to the non-adaptive fit? If so, think about why this has happened. Compare the fitted effect of time under the adaptive and non-adaptive basis, do you see any differences?
+
+\item Use \verb|qq.gam| to get a QQ-plot of the residuals (you can set the \verb|rep| argument to, say, 100 to get simulation-based reference intervals). Does this plot reveal any problem? Now produce a scatterplot of absolute residuals vs time, does the size of the residuals depend on time? The answer is `yes', and this is not taken into account by our model. We can address this 'manually' be estimating the variance of the residuals as a function of time, and use it to re-weight the observations when fitting the model (see next point). 
+
+\item Regress the log squared residuals on \verb|times| using a Gaussian GAM. If we call this fit (say) \verb|resFit|, the resulting fitted values in \verb|resFit$fitted.values| are estimates of the expected value of the log squared residuals, as a function of time. Hence \verb|exp(resFit$fitted.values)| is an approximation to the residuals variance. Re-fit the acceleration vs time Gaussian GAM with weights inversely proportional to the variance (you have to use the \verb|weights| argument in \verb|gam|). Compare the resulted fitted effect and intervals with those you obtained under the un-weighted fit.   
+
+\item \textbf{Extra:} Use the \verb|gaulss| family in \verb|mgcv| to fit a Gaussian GAM where the both the mean and the variance of the acceleration depend on time. See \verb|?gaulss| for details.
+ 
+\end{enumerate} %% end of retinopathy question
+
+
+\section{CO$_2$ modelling }
+This question is about modelling data with seasonality, and the need to be very careful if trying to extrapolate with GAMs (or any statistical model). The data frame {\tt co2s} contains monthly measurements of CO$_2$ at the south pole from January 1957 onwards. The columns are {\tt co2}, the month of the year, {\tt month}, and the cumulative number of months since January 1957, {\tt c.month}. There are missing {\tt co2} observations in some months.\index{extrapolation!dangers of}
+
+Questions:
+\begin{enumerate}
+\item Load \verb|mgcv| and the data with \verb+library(gamair); data(co2s)+
+\item Plot the CO$_2$ observations against cumulative months.
+\item Fit a Gaussian additive model with a smooth effect for \verb|c.month|, using the {\tt gam} function. Use the {\tt cr} basis, and a basis dimension of 100.  
+\item Obtain the predicted CO$_2$ for each month of the data, plus 36 months after the end of the data, as well as associated standard errors. Produce a plot of the predictions with twice standard error bands. Are the predictions in the last 36 months credible? NB: to produce the plot you have to write your own code, \verb|mgcv| does not produce such plots.
+\item Fit the model $\mathbb{E}(\text{CO}_2) = f_1({\tt c.month}_i) + f_2({\tt month}_i)$ where $f_1$ and $f_2$ are smooth functions. Use a basis of dimension 50 for $f_1$ and a cyclic basis for $f_2$. In the \verb|gam| call, you will need to set argument \verb+knots+ to \verb+list(month=c(1,13))+ to make so that that the effect of January is the same as January, not that December and January are the same!
+\item Repeat the prediction and plotting in question 4 for the new model. Are the predictions more credible now? Explain the differences between the new results and those from question 4.
+% \item Transform the fitted qgam model to a \verb|gamViz| object, by calling \verb|getViz| with argument \verb|nsim = 0| (we need to set \verb|nsim| to 0 because, at the present moment, qgam does not allow to simulate data from the model). Plot the smooth effects and experiment with model checks (e.g. QQ-plots). Can you expect the residuals to be normally distributed in a quantile regression model? We talk more about this in the exercise on electricity load forecasting.
+\end{enumerate} %% C02
+
+\section{Ozone modelling}
+
+Data frame {\tt ozone} contains daily(ish) ozone  measurements over Los Angeles ({\tt O3}, ppm), along with:
+\begin{trivlist}
+\item {\tt vh} the height at which the atmospheric pressure is 500mb, in metres.
+\item {\tt wind} the wind speed (reported as miles per hour, but this seems improbable).
+\item {\tt humidity} (usual \% scale).
+\item {\tt temp} air temperature (Fahrenheit).
+\item {\tt ibh} the inversion layer base height in feet.
+\item {\tt ibt} the inversion base temperature (Fahrenheit).
+\item {\tt dpg} `Dagget air pressure gradient' (mmhg).
+\item {\tt vis} visibility in miles.
+\item {\tt doy} Julian day, where 1 is Jan 1 1976.
+\end{trivlist}
+The aim is to build a GAM model to explore the relationship between ozone and the other variables.
+
+Questions:
+
+\begin{enumerate}
+
+\item Load \verb+testGam+ and the data (\verb+data(ozone)+), and use something like \verb+pairs(ozone)+ to have a look at it.
+
+\item Load \verb+mgcv+ and use \verb|gam| to fit a Gaussian GAM with ${\tt O3}$ as response, where $\log(\mathbb{E}({\tt 03}))$ is given by a sum of smooth functions (e.g. \verb|s(wind)|) of each of the predictors. You will need to use the log-link, which requires using the argument \verb|family=gaussian(link=log)| in the call to \verb|gam|. Plot the fitted effects using \verb|plot|.
+
+\item Check the model residuals using the \verb|gam.check| functions. Do you see any residual pattern when you plot the residuals against the fitted values or linear predictor?
+
+\item Refit the model using a Gamma as response distribution (\verb|Gamma(link=log)|), and re-check the residuals. Does the residual distribution look better?
+
+\item Fit an alternative model where you are using the identity-link (\verb|Gamma(link=identity)|). Does a model with an additive (i.e. identity-link) structure do better than that with a multiplicative (log-link) structure in terms of \verb|AIC|?  
+
+\item Plot the smoothed effects again and use the \verb|summary| function to see which effects are significant. Try simplifying the model.
+
+\item Once you have converged on a model, plot it and interpret the fitted smooth effects: do they make sense?
+
+% \item {\bf Extra part} (only if time): The smooth function of {\tt doy} should arguably be cyclic (i.e. values and derivatives should match at `year ends'). Using the {\tt bs="cc"} option to {\tt s} can achieve this, but to get wrapping at the year end (rather than the data ends) you need to supply knot locations for {\tt doy}, which span a full year. To do this you can use the {\tt knots} argument to {\tt gam}: something like \verb+knots=list(doy=seq(25,390,length=10))+ should do it (the strange range is because the data span less than a year, but are spread over 2 calendar years).
+
+\end{enumerate}
 
 \section{Forecasting electricity demand on GEFCom2014 data}
 Here we consider the electricity demand dataset taken from the GEFCom2014 challenge. The dataset covers the period January 2005 to December 2011 and it contains the following variables:
@@ -129,17 +243,81 @@ Here we consider the electricity demand dataset taken from the GEFCom2014 challe
 
 Questions:
 \begin{enumerate}
-\item Load \verb+mgcViz+ and the data (\verb+load("data/gefcom_small.rda")+). Use \verb|gamV| to fit a Gaussian GAM where the model formula (e.g. \verb|y~s(x)|) contains: smooth effects for \verb|wM|, \verb|wM_s95|, \verb|Posan| (optionally use a cyclic basis for the latter by doing \verb|s(Posan, bs="cc")|); parametric effects for \verb|Trend|, \verb|Dow| and \verb|NetDemand.24|. In the call to \verb|gamV| set the argument \verb|aViz=list(nsim = 50)| to have some simulated responses for residuals checking. Plot all the fitted effects using \verb|plot|.
+\item Load \verb+testGam+ and the data (\verb+data(gefcom_small)+). Have a look at it by, for instance, using \verb|pairs(gefcom_small)|.
 
-\item Use \verb|check1D| with the \verb|l_gridCheck1D| layer to check that the mean of the residuals does not depart too much from 0, depending on the value of \verb|Trend|. Do you see any systematic pattern? Use the function \verb|check| to see whether you should increase \verb|k| for any of the smooth effects. 
+\item Fit a Gaussian GAM where the model formula contains: smooth effects for \verb|wM|, \verb|wM_s95|, \verb|Posan| (optionally use a cyclic basis for the latter by doing \verb|s(Posan, bs="cc")|); parametric effects for \verb|Trend|, \verb|Dow| and \verb|NetDemand.24|. Plot the fitted effects using \verb|plot|, and look at the relative importance of the effects.
 
-\item Refit the model but now include a smooth effect for \verb|Trend| (with \verb|k=6|) and increase the basis dimension of the effects of \verb|wM|, \verb|wM_s95|, \verb|Posan| to \verb|k = | 20, 15 and 15 respectively. Compare this model to the old one in terms of \verb|AIC|, re-check the residuals using \verb|check1D| and recheck the bases dimension using \verb|check|. Does everything look good? Increasing too much the basis dimension for \verb|Trend| is not a good idea, why?
+\item Plot the residuals against the \verb|Trend| variable, do you see any non-linear dependence (you might need to zoom in using \verb|ylim| because of an outlier)? Use \verb|gam.check| to check whether you should increase \verb|k| for any of the smooth effects. 
 
-\item Use \verb|qq| to produce a QQ-plot of the residuals, do you see any problem? Refit the same model, but now use a scaled Student-t distributions by setting \verb|family = scat|. Any improvement in AIC? How do the residuals look now?
+\item Increase \verb|k| for all effects, introduce a smooth effect for \verb|Trend|, the re-fit and repeat the checks in the previous point. Does everything look good? \verb|gam.check| shows that the effect of \verb|Trend| is using all the basis functions available, is this a problem? Once you have converged on a model, compare your new model to the old one in terms of \verb|AIC|.
 
-\item Check whether a scaled Student-t with log-link function \verb|scat(link=log)| achieves lower AIC. Then plot all the fitted effects of final model using \verb|plot| (you can set \verb|allTerms=TRUE| to plot also the parametric effects). Do the effects make sense?
+\item Use \verb|qq.gam| to produce a QQ-plot of the residuals, do you see any problem? Refit the same model, but now use a scaled Student-t distributions by setting \verb|family = scat|. Any improvement in AIC? How do the residuals look now?
+
+\item Check whether a scaled Student-t with log-link function \verb|scat(link=log)| achieves lower AIC. Then plot all the fitted effects of final model using \verb|plot| (you can set \verb|all.terms=TRUE| to plot also the parametric effects). Do the effects make sense?
 
 \end{enumerate}
+
+\section{Larynx cancer in Germany}
+
+First load some data on cancer of the larynx by health reporting districts in Germany.
+\begin{verbatim}
+library(testGam)
+library(mgcv)
+data("Larynx")       # load Larynx cancer death data 'Larynx'
+data("german.polys") # load polygons defining German regions 'german.polys'
+# Get regions "midpoints"
+X <- t(sapply(german.polys,colMeans,na.rm=TRUE))
+\end{verbatim}
+The variables in the \verb|Larynx| dataframe are:
+\begin{itemize}
+\item[region] code identifying region;
+\item[E] expected number of deaths (according to population and pan German total);
+\item[Y] number of deaths from Larynx cancer 1986-1990;
+\item[x] measure of smoking rate in region.
+\end{itemize}
+
+Questions:
+
+\begin{enumerate}
+\item Run the code above and then use \verb|gam| to fit a Poisson GAM with a smooth effects for \verb|x| and the following Markov Random Field (MRF) effect for region:
+\begin{verbatim}
+s(region, k = 200, bs = "mrf", xt = list(polys=german.polys))
+\end{verbatim}
+and the offset term \verb|offset(log(E))|, meant to take into account the fact that the number of death is proportional to the population of each region. Plot the fitted effects.
+
+\item Now substitute the MRF smooth either with the isotropic smooth \verb|s(X[,1],X[,2],k=200)|. Plot the 2D fitted effect in different ways using the \verb|scheme| argument (see \verb|plot.gam|) Which model does better in terms of AIC? 
+
+\item Now use a tensor product smooth \verb|te(X[,1],X[,2],k=c(15, 15))| for the spatial effect. Plot it as before and compare the three spatial effects fitted so far. Which of the models does better in terms of AIC?
+
+\item Check the last model we fitted using \verb|check.gam|. Do you get an error? This is because so far we adopted the bad practice of using global variables (\verb|X|) in our model formulas! Add each column of \verb|X| as a proper variable in the \verb|larynx| data set, modify the model formula accordingly and re-fit. Is the error gone? Now use the \verb|vis.gam| function to visualise the spatial effect in 3D. You can use the \verb|theta| and \verb|phi| arguments to modify the viewpoint (see \verb|?vis.gam|).
+
+\end{enumerate}
+
+\section{Retinopathy among diabetics (continued)} 
+
+Data frame {\tt wesdr} (taken from Chong Gu's \verb|gss| package) contains a subset of data from a Wisconsin study on development of retinopathy among diabetics. The following variables are provided:
+\begin{itemize}
+\item {\tt ret}, a binary indicator of development of retinopathy by first follow up of study.
+\item {\tt bmi}, the body mass index at entry to the study (between 18 and 25 is considered healthy).
+\item {\tt dur}, the duration of diabetes, in years, at entry.
+\item {\tt gly}, the percentage of glycosylated haemoglobin (HbA1C) in the blood (haemoglobin to which glucose has bound). 2.5-3.5\% is normal for non-diabetics. 6.5\% is generally considered good control for diabetics.
+\end{itemize}
+
+The aim is to model the probability of retinopathy as a function of the other variables.
+
+Questions:
+
+\begin{enumerate}
+\item Load \verb+testGam+, \verb+mgcv+ and the data (\verb+data(wesrd)+). Have a look at the relation between the different variables using \verb+pairs(wesdr)+ or other exploratory visualisations.
+
+\item In a previous exercise we found out that \verb|dur|, \verb|gly| and \verb|bmi| are all important predictors of retinopathy. Now we are looking for interaction of these variables. It is not immediately clear what interactions should appear in the linear predictor, hence in the first instance use all smooth main effects plus all two-way interactions using {\tt ti} terms with \verb|k=10|. Use a logistic regression model (\verb|family = binomial|). Use \verb|summary| verify which effects seems important and visualise them using \verb|plot|. Do you see any problem? (\textbf{NB}: here we are using a large number of basis functions, $(k-1) \times (k-1)$, for each smooth interaction to make a point.) 
+
+\item Refit the same model, but now use \verb|method = "REML"| to select the smoothing parameters by REstricted Marginal Likelihood, rather than via the default Generalized Cross Validation (GCV) method.  Use \verb|summary| and \verb|plot| to check whether the model is still over-fitting.  
+
+\item Refit the same model, but now use \verb|select = TRUE| to do automatic variable selection. Use \verb|summary| to check whether the EDF used by the interactions have changed, relative to the first fit. Has the shape of the interaction terms changed as well? 
+
+\item Simplify the model by removing non-significant effects, re-fit and visualise the effects. Is the model with smooth interaction(s) better than a model with linear interactions (e.g. in terms of AIC)?
+\end{enumerate} %% end of retinopathy question
 
 
 \section{Big GAM modelling of GEFCom14 electricity demand data} 
@@ -283,60 +461,9 @@ Questions:
 
 \end{enumerate} %% end of retinopathy question
 
-\section{CO$_2$ modelling }
-This question is about modelling data with seasonality, and the need to be very careful if trying to extrapolate with GAMs (or any statistical model). The data frame {\tt co2s} contains monthly measurements of CO$_2$ at the south pole from January 1957 onwards. The columns are {\tt co2}, the month of the year, {\tt month}, and the cumulative number of months since January 1957, {\tt c.month}. There are missing {\tt co2} observations in some months.\index{extrapolation!dangers of}
-
-Questions:
-\begin{enumerate}
-\item Load \verb|mgcv| and the data with \verb+library(gamair); data(co2s)+
-\item Plot the CO$_2$ observations against cumulative months.
-\item Fit a Gaussian additive model with a smooth effect for \verb|c.month|, using the {\tt gam} function. Use the {\tt cr} basis, and a basis dimension of 100.  
-\item Obtain the predicted CO$_2$ for each month of the data, plus 36 months after the end of the data, as well as associated standard errors. Produce a plot of the predictions with twice standard error bands. Are the predictions in the last 36 months credible? NB: to produce the plot you have to write your own code, \verb|mgcv| does not produce such plots.
-\item Fit the model $\mathbb{E}(\text{CO}_2) = f_1({\tt c.month}_i) + f_2({\tt month}_i)$ where $f_1$ and $f_2$ are smooth functions. Use a basis of dimension 50 for $f_1$ and a cyclic basis for $f_2$. In the \verb|gam| call, you will need to set argument \verb+knots+ to \verb+list(month=c(1,13))+ to make so that that the effect of January is the same as January, not that December and January are the same!
-\item Repeat the prediction and plotting in question 4 for the new model. Are the predictions more credible now? Explain the differences between the new results and those from question 4.
-% \item Transform the fitted qgam model to a \verb|gamViz| object, by calling \verb|getViz| with argument \verb|nsim = 0| (we need to set \verb|nsim| to 0 because, at the present moment, qgam does not allow to simulate data from the model). Plot the smooth effects and experiment with model checks (e.g. QQ-plots). Can you expect the residuals to be normally distributed in a quantile regression model? We talk more about this in the exercise on electricity load forecasting.
-\end{enumerate} %% C02
 
 
 
-
-\section{Ozone modelling}
-
-Data frame {\tt ozone} contains daily(ish) ozone  measurements over Los Angeles ({\tt O3}, ppm), along with:
-\begin{trivlist}
-\item {\tt vh} the height at which the atmospheric pressure is 500mb, in metres.
-\item {\tt wind} the wind speed (reported as miles per hour, but this seems improbable).
-\item {\tt humidity} (usual \% scale).
-\item {\tt temp} air temperature (Fahrenheit).
-\item {\tt ibh} the inversion layer base height in feet.
-\item {\tt ibt} the inversion base temperature (Fahrenheit).
-\item {\tt dpg} `Dagget air pressure gradient' (mmhg).
-\item {\tt vis} visibility in miles.
-\item {\tt doy} Julian day, where 1 is Jan 1 1976.
-\end{trivlist}
-The aim is to build a GAM model to explore the relationship between ozone and the other variables.
-
-Questions:
-
-\begin{enumerate}
-
-\item Load the data using \verb|ozone<-read.table("data/ozone.txt")| and use something like \verb+pairs(ozone)+ to look at it.
-
-\item Load \verb+mgcViz+ and use \verb|gamV| to fit a Gaussian GAM with ${\tt O3}$ as response, where $\log(\mathbb{E}({\tt 03}))$ is given by a sum of smooth functions (e.g. \verb|s(wind)|) of each of the predictors. You will need to use the log-link, which requires using the argument \verb|family=gaussian(link=log)| in the call to \verb|gamV|. Plot the fitted effects using \verb|plot|.
-
-\item Check the model residuals using the \verb|qq| and \verb|check| functions. Do you see any residual pattern when you plot the residuals against the fitted values or linear predictor?
-
-\item Refit the model using a Gamma as response distribution (\verb|Gamma(link=log)|), and re-check the residuals. Does the residual distribution look better?
-
-\item Fit an alternative model where you are using the identity-link (\verb|Gamma(link=identity)|). Does a model with an additive (i.e. identity-link) structure do better than that with a multiplicative (log-link) structure in terms of \verb|AIC|?  
-
-\item Plot the smoothed effects again and use the \verb|summary| function to see which effects are significant. Try simplifying the model.
-
-\item Once you have converged on a model, plot it and interpret the fitted smooth effects: do they make sense?
-
-% \item {\bf Extra part} (only if time): The smooth function of {\tt doy} should arguably be cyclic (i.e. values and derivatives should match at `year ends'). Using the {\tt bs="cc"} option to {\tt s} can achieve this, but to get wrapping at the year end (rather than the data ends) you need to supply knot locations for {\tt doy}, which span a full year. To do this you can use the {\tt knots} argument to {\tt gam}: something like \verb+knots=list(doy=seq(25,390,length=10))+ should do it (the strange range is because the data span less than a year, but are spread over 2 calendar years).
-
-\end{enumerate}
 
 
 

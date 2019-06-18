@@ -1,6 +1,6 @@
 ---
 title: "Ozone: solution"
-author: "Matteo Fasiolo"
+author: "Matteo Fasiolo, Simon N. Wood"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -8,7 +8,7 @@ output:
     number_sections: true
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Ozone}
+  %\VignetteIndexEntry{Ozone_mgcv}
   %\VignetteEncoding{UTF-8}
 ---
   
@@ -23,62 +23,63 @@ library(RhpcBLASctl); blas_set_num_threads(1)
 ```
 
 1) Load data and plot it
-```{r oz1, message = F}
+```{r oz1, message = F, fig.width = 8, fig.height = 7}
 library(testGam)
-library(mgcViz)
+library(mgcv)
 data("ozone")
 pairs(ozone)
 ```
 2) Fit Gaussian GAM and plot fitted effects:
-```{r oz2, message = F}
-b <- gamV(O3 ~ s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
+```{r oz2, message = F, fig.width = 8, fig.height = 8}
+b <- gam(O3 ~ s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
               s(dpg)+s(ibt)+s(vis)+s(doy),family=gaussian(link=log),
               data=ozone)
-print(plot(b), pages = 1)
+plot(b, pages = 1)
 ```
 
 3) Check model residuals:
-```{r oz3, message = F}
-qq(b)
-check(b)
+```{r oz3, message = F, fig.width = 8, fig.height = 6}
+par(mfrow = c(2, 2))
+gam.check(b)
 ```
-The variance increases with the mean.
+The residuals vs linear predictor plot clearly shows that the variance increases with the mean.
 
 4) Refit using the Gamma response distribution:
-```{r oz4, message = F}
-b <- gamV(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
+```{r oz4, message = F, fig.width = 8, fig.height = 6}
+b <- gam(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
             s(dpg)+s(ibt)+s(vis)+s(doy),family=Gamma(link=log),
             data=ozone)
 
-check(b)
+par(mfrow = c(2, 2))
+gam.check(b)
 ```
-Looks better!
+The residuals vs linear predictor and the QQ-plot look better. In the response vs fitted values plot we still see that the variance of the response increases with the fitted values (the mean), but this is being modelled via the gamma distribution (as demonstrated by the residuals vs linear predictor plot).
 
 5) Comparing log link with identity link:
 ```{r oz5, message = F}
-b1 <- gamV(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
+b1 <- gam(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
             s(dpg)+s(ibt)+s(vis)+s(doy),family=Gamma(link=identity),
             data=ozone)
 
 AIC(b,b1) ## 
 ```
-multiplicative (log link) was better (lower AIC).
+The multiplicative model (log link) was better (lower AIC).
 
 6) Plotting all effects:
-```{r oz6, message = F}
-print(plot(b), pages=1)
+```{r oz6, message = F, fig.width = 8, fig.height = 8}
+plot(b, pages=1)
 summary(b)
 ```
-Drop ibd, which has the highest p-value:
+Drop `ibd`, which has the highest p-value:
 ```{r oz7, message = F}
-b1 <- gamV(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
+b1 <- gam(O3~s(vh)+s(wind)+s(humidity)+s(temp)+s(ibh)+
               s(dpg)+s(vis)+s(doy),family=Gamma(link=log),
               data=ozone)
 summary(b1)
 ```
 Try to drop humidity too:
 ```{r oz8, message = F}
-b2 <- gamV(O3~s(vh)+s(wind)+s(temp)+s(ibh)+
+b2 <- gam(O3~s(vh)+s(wind)+s(temp)+s(ibh)+
               s(dpg)+s(vis)+s(doy),family=Gamma(link=log),
               data=ozone)
 summary(b2)
@@ -91,7 +92,7 @@ AIC(b1, b2)
 b1 has marginally higher AIC, but choose b2 for simplicity.
 
 7) Plot effects of final model:
-```{r oz10, message = F}
-print(plot(b2), pages = 1)
+```{r oz10, message = F, fig.width = 8, fig.height = 8}
+plot(b2, pages = 1)
 ```
 

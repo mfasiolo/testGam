@@ -17,7 +17,6 @@ vignette: >
 library(knitr)
 library(rgl)
 opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
-knit_hooks$set(webgl = hook_webgl)
 ```
 
 ```{r setup1, include=FALSE}
@@ -65,8 +64,9 @@ plotSlice(x = sm(fit, 3),
 There doesn't seem to be much change in the precipication pattern, maybe there is a decrease of rainfall levels in the South East (in the Canton of Ticino).
 
 4) We plot one slice through time using `rgl`:
-```{r rus6346, webgl=TRUE}
+```{r rus6346}
 plotRGL(x = sm(fit, 3), fix = c("year" = 1985), residuals = TRUE)
+rglwidget()
 ```
 
 5) Remove the tensor effect w.r.t. time and fit the model to several quantiles:

@@ -47,7 +47,7 @@ print(plot(fit1, allTerms = TRUE), pages = 1)
 ```{r bam2, message = F}
 tmp <- check(fit1) 
 ```
-The p-values for `Trend` and `Posan` are very low, suggesting that we should increase the dimension of their spline bases (by increasing `k`). However, if we do this for `Tendance` (which is simply a time counter) we will ultimately end up interpolating the data! Increasing the basis dimension for `Posan` might lead to a similar problem.
+The p-values for `Trend` and `Posan` are very low, suggesting that we should increase the dimension of their spline bases (by increasing `k`). However, if we do this for `Trend` (which is simply a time counter) we will ultimately end up interpolating the data! Increasing the basis dimension for `Posan` might lead to a similar problem.
 
 The p-values of `wM`, `wM_s95` and `Instant` are not low, but the Effective Degrees of Freedom (EDF) of the fitted smooths is very close to the bases dimension (`k'`). Hence, we might want to increase $k$ for these effects. Before doing so, we look for residuals patterns along these covariates and `NetDemand.24`:
 ```{r bam3, message = F}
@@ -71,7 +71,7 @@ fit2 <- bamV(NetDemand ~ Dow +
 
 tmp <- check(fit2) # Looks better
 ```
-EDF now lower than `k'` for all variables, apart from `Tendance` (but this is ok, see above).
+EDF now lower than `k'` for all variables, apart from `Trend` (but this is ok, see above).
 
 ```{r bam4b, message = F}
 pl <- check1D(fit2, x = list("NetDemand.24", "wM", "wM_s95", "Instant")) + l_gridCheck1D(n = 40)

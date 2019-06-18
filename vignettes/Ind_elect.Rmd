@@ -23,7 +23,7 @@ library(RhpcBLASctl); blas_set_num_threads(1)
 ```
 
 1) Load data and fit a basic Gaussian GAM:
-```{r indiv1, message = F}
+```{r indiv1, message = F, fig.width = 8.5, fig.height = 4}
 library(testGam)
 library(mgcViz)
 data("Ind_elect")
@@ -39,7 +39,7 @@ All effects seem important, according to the p-values.
 
 2) Now we use `check2D` to look at the mean residuals across two variables, we are looking for 
 interactions between `ID` and some of the other covariates:
-```{r indiv1a, message = F}
+```{r indiv1a, message = F, fig.width = 8.5, fig.height = 5}
 pl1 <- check2D(fit1, "ID", "instant") + l_gridCheck2D(bw = c(NA, 1))
 pl2 <- check2D(fit1, "ID", "temp") + l_gridCheck2D(bw = c(NA, 1))
 pl3 <- check2D(fit1, "ID", "day") + l_gridCheck2D(bw = c(NA, 5))
@@ -47,7 +47,7 @@ pl3 <- check2D(fit1, "ID", "day") + l_gridCheck2D(bw = c(NA, 5))
 gridPrint(pl1, pl2, pl3, ncol = 2)
 ```
 Here the mean residuals are normalized using simulations from the model. Hence values <-2 or >2 are important, and here we have some massive deviations from zero. Costumers 2 and 27 seems particularly difficult to forecast. Let's look at the latter:
-```{r indiv1c, message = F}
+```{r indiv1c, message = F, fig.width = 7, fig.height = 4}
 in27 <- which(indElec$ID == 27)
 par(mfrow = c(1, 2))
 plot(indElec$instant[in27], indElec$load[in27])
@@ -68,7 +68,7 @@ summary(fit2)
 AIC(fit1, fit2)
 ```
 This seems to be a very serious improvement in AIC! We repeat the residual checks:
-```{r indiv2a, message = F}
+```{r indiv2a, message = F, fig.width = 8.5, fig.height = 5}
 pl1 <- check2D(fit2, "instant", "ID") + l_gridCheck2D(bw = c(NA, 1))
 pl2 <- check2D(fit2, "temp", "ID") + l_gridCheck2D(bw = c(NA, 1))
 pl3 <- check2D(fit2, "day", "ID") + l_gridCheck2D(bw = c(NA, 5))

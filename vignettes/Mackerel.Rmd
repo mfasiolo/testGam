@@ -13,6 +13,8 @@ vignette: >
 ---
   
 ```{r setup, include=FALSE}
+options(rgl.useNULL=TRUE)
+options(rgl.printRglwidget=FALSE)
 library(knitr)
 library(rgl)
 opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=FALSE)
@@ -24,7 +26,7 @@ library(RhpcBLASctl); blas_set_num_threads(1)
 ```
 
 1) Load packages and plot data
-```{r mack1, message = F}
+```{r mack1, message = F, fig.width = 6, fig.height = 6}
 library(testGam)
 library(mgcViz)
 data("mack")
@@ -46,7 +48,7 @@ fit1 <- gamV(egg.count ~  s(c.dist) + s(I(b.depth^0.5)) + s(temp.surf) + s(temp.
 ```
 
 3) Look at QQ-plot:
-```{r mack2a, message = F}
+```{r mack2a, message = F, fig.width = 4, fig.height = 4}
 qq(fit1)
 ```
 does not look good at all, the residuals are over dispersed. Maybe negative binomial is better:
@@ -58,7 +60,7 @@ fit2 <- gamV(egg.count ~  s(c.dist) + s(I(b.depth^0.5)) + s(temp.surf) + s(temp.
 qq(fit2)
 ```
 
-```{r mack4, message = F}
+```{r mack4, message = F, fig.width = 4, fig.height = 4}
 fit3 <- gamV(egg.count ~  s(c.dist) + s(I(b.depth^0.5)) + s(temp.surf) + s(temp.20m) + 
                           s(lat) + s(lon) + s(salinity) +
                           offset(log.net.area), data = mack, family = tw)
@@ -100,7 +102,7 @@ print(pl, pages = 1)
 ```
 
 6) Plot all smooth effects:
-```{r mack9, message = F}
+```{r mack9, message = F, fig.width = 9, fig.height = 4}
 print(plot(fit4), pages = 1)
 ```
 
@@ -110,7 +112,7 @@ plot(sm(fit4, 5)) + l_fitRaster() + l_fitContour() + l_points(colour = 2, shape 
 ```
 
 Get 3D interactive plot:
-```{r mack11a, message = F}
+```{r mack11a, message = F, echo = 1}
 plotRGL(sm(fit4, 5), residuals = TRUE)
 rglwidget()
 ```

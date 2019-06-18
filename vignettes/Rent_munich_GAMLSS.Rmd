@@ -24,12 +24,12 @@ library(RhpcBLASctl); blas_set_num_threads(1)
 ```
 
 1) Load data, plot it and fit a basic GAM:
-```{r dbbmi1, message = F}
+```{r dbbmi1, message = F, fig.width = 8, fig.height = 7}
 library(testGam)
 library(mgcViz)
 data("munich_rent")
 
-pairs(munich_rent)
+pairs(munich_rent, lower.panel = NULL)
 
 fit1 <- gamV(R ~ s(Fl) + s(A) + loc + B + H + L, data = munich_rent, aViz = list(nsim = 50))
 
@@ -37,7 +37,7 @@ summary(fit1)
 ```
 
 Plot smooth effects:
-```{r dbbmi2, message = F}
+```{r dbbmi2, message = F, fig.width = 8, fig.height = 4}
 print(plot(fit1), pages = 1)
 ```
 
@@ -55,7 +55,7 @@ summary(fit2)
 Effect of floor space `Fl` must increase with the location desirability `loc`.
 
 3) Looking at variance of residuals across covariates:
-```{r dbbmi4, message = F}
+```{r dbbmi4, message = F, fig.width = 8, fig.height = 5}
 pl <- check1D(fit2, list("Fl", "A", "B", "H", "L", "loc")) + l_gridCheck1D(gridFun = sd)
 print(pl, pages = 1)
 ```

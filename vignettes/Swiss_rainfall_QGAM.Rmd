@@ -25,7 +25,7 @@ library(RhpcBLASctl); blas_set_num_threads(1)
 ```
 
 1) Load data and fit a basic Gaussian GAM:
-```{r uklss1, message = F}
+```{r uklss1, message = F, fig.width = 8.5, fig.height = 5}
 library(mgcViz);
 library(gamair);
 data(swer)
@@ -38,7 +38,7 @@ print(plot(fit), pages = 1)
 ```
 
 2) Fit a smooth trend for each climate region:
-```{r rus981}
+```{r rus981, fig.width = 7, fig.height = 4}
 fit2 <- qgamV(exra ~ s(nao) + s(elevation) +
                      s(year, climate.region, bs = "fs", k = 5) + s(E, N), 
                      data = swer, qu = 0.5)
@@ -88,7 +88,7 @@ print(plot(fitM, select = 3), pages = 1)
 Interestingly the spatial effect is much stronger for high quantiles (extreme rainfall) than for the low ones. For quantile 0.9 the spatial effect varies between +50mm in the Canton of Ticino and -40mm in the Canton of Grisons. 
 
 Finally we can see how the climate region effect changes depending on the quantile of interest:
-```{r rus72547}
+```{r rus72547, fig.width = 8.5, fig.height = 5}
 print(plot(fitM, select = 5), pages = 1)
 ```
 

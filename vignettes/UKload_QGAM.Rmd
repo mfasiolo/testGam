@@ -73,20 +73,20 @@ print(plot(fitM, allTerms = T, select = 5:7), pages = 1)
 ```
 It is interesting to notice that the holiday effect is stronger (more negative) on the low quantiles.  
 
-7. Model checking
+5. Model checking
 
-We consider the third quantile (the median), first we look at the bias caused by smooth the loss:
-```{r edf576756, message = F}
-indx <- 3
-check(fitM[[indx]])
-```
-These checks mostly focus on the fraction of residuals falling below the fitted quantile, 
-which should be close to 0.5 given that we are fitting quantile $\tau = 0.5$.
+<!-- We consider the third quantile (the median), first we look at the bias caused by smooth the loss: -->
+<!-- ```{r edf576756, message = F} -->
+<!-- indx <- 3 -->
+<!-- check(fitM[[indx]]) -->
+<!-- ``` -->
+<!-- These checks mostly focus on the fraction of residuals falling below the fitted quantile,  -->
+<!-- which should be close to 0.5 given that we are fitting quantile $\tau = 0.5$. -->
 
-We can also verify whether the fraction of points falling below the fit depart too much from $\tau = 0.5$, 
+We can verify whether the fraction of points falling below the fit depart too much from $\tau = 0.5$, 
 along each covariate:
 ```{r edf12, message = F}
-pl <- check1D(fitM[[indx]], x = list("Dow", "wM", "wM_s95", "Posan")) + l_gridQCheck1D(qu = qus[indx]) 
+pl <- check1D(fitM[[3]], x = list("Dow", "wM", "wM_s95", "Posan")) + l_gridQCheck1D(qu = qus[3]) 
 print(pl, pages = 1)
 ```
 Looks good, most departures are within 80 percent confidence bands.

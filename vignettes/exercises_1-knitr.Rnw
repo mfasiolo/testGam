@@ -36,7 +36,7 @@
 \begin{document}
 
 <<setup,echo=FALSE,cache=FALSE,eval=TRUE>>=
-setwd("~/Desktop/All/Dropbox/Work/Notes/Slides/qgam/2019_EDF_mgcViz/exercises")
+#setwd("~/Desktop/All/Dropbox/Work/Notes/Slides/qgam/2019_EDF_mgcViz/exercises")
 options(prompt = " ", continue = " ")
 require(knitr)
 options(replace.assign=TRUE,show.signif.stars=FALSE,width=100)

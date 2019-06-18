@@ -8,3 +8,6 @@ notifications:
   email: true
 r_github_packages: 
  - mfasiolo/mgcFam
+script: 
+  - |
+    travis_wait 40 R CMD build .

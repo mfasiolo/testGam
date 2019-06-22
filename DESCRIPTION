@@ -8,7 +8,8 @@ Imports: mgcViz (>= 0.1.4),
          mgcFam, 
          gamair, 
          e1071, 
-         languageR, 
+         languageR,
+         gamlss.data, 
          gridExtra, 
          hexbin
 License: GPL-3

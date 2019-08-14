@@ -46,7 +46,7 @@ pl3 <- check2D(fit1, "ID", "day") + l_gridCheck2D(bw = c(NA, 5))
 
 gridPrint(pl1, pl2, pl3, ncol = 2)
 ```
-Here the mean residuals are normalized using simulations from the model. Hence values <-2 or >2 are important, and here we have some massive deviations from zero. Costumers 2 and 27 seems particularly difficult to forecast. Let's look at the latter:
+Here the mean residuals are normalized using simulations from the model. Hence values <-2 or >2 are important, and here we have some massive deviations from zero. Customers 2 and 27 seems particularly difficult to forecast. Let's look at the latter:
 ```{r indiv1c, message = F, fig.width = 7, fig.height = 4}
 in27 <- which(indElec$ID == 27)
 par(mfrow = c(1, 2))
@@ -55,7 +55,7 @@ plot(indElec$temp[in27], indElec$load[in27])
 ```
 Most of the consumption happens before 7 am, and at temperatures < 12 degrees. Maybe this is due to storage heating?
 
-3) Fit model with by-factor smooth for each costumer, but same smoothing parameter for each by-factor effect:
+3) Fit model with by-factor smooth for each customer, but same smoothing parameter for each by-factor effect:
 ```{r indiv2, message = F}
 fit2 <- bamV(load ~ dow + ID + 
                     s(instant, by = ID, id = 1) + 
@@ -119,7 +119,7 @@ check2D(fit4, indElec$load48SM, indElec$ID) + l_gridCheck2D()
 ```
 Deviations are now in the range [-4,+4], still large, but better than before. 
 
-6) Looking at some individual consumptions and predictions. Change the loop indexes to look at different costumers:
+6) Looking at some individual consumptions and predictions. Change the loop indexes to look at different customers:
 ```{r indiv8, message = F}
 par(mfrow = c(3, 3), mar = c(2.1, 4.1, 1.1, 2.1))
 for(ID in 1:9){
@@ -132,4 +132,4 @@ for(ID in 1:9){
   lines(subP[kk], col = 2)
 }
 ```
-Costumer 3 is arguably quite hard to forecast!
+customer 3 is arguably quite hard to forecast!

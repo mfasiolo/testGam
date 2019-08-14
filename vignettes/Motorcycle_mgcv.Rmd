@@ -114,7 +114,7 @@ lines(mcycle$times, pr$fit - 2*pr$se, col = 2)
 ``` 
 
 
-6) We model mean and variance jointly using a Gaussian location scale model
+7) We model mean and variance jointly using a Gaussian location scale model
 ```{r gaulss_fit, message = F, fig.width = 8.5, fig.height = 4}
 fit_ls <- gam(list(accel ~ s(times, k=20, bs="ad"), ~s(times)),
               data=mcycle, 

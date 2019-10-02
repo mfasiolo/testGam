@@ -13,6 +13,7 @@ notifications:
 
 r_github_packages: 
  - mfasiolo/mgcFam
+ - mfasiolo/mgcViz
 
 # Some libraries need to be installed, otheriwse rgl install fails
 addons:

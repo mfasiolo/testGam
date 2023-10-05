@@ -124,7 +124,6 @@ Both plots show several departures from the model based estimates (the model is 
 
 7. Fitting shash GAMLSS model:
 ```{r edf12, message = F}
-library(mgcFam)
 form <- list(NetDemand ~ s(wM,k=20,bs='cr') + 
                s(wM_s95,k=20,bs='cr') + 
                s(Posan,bs='ad',k=30) + 

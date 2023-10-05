@@ -91,7 +91,6 @@ print(pl, pages = 1)
 
 We adopt a `shash` models and include a model for skewness:
 ```{r dbbmi10, message = F}
-library(mgcFam)
 fit4 <- gamV(list(R ~ Fl + Fl:loc + s(A) + loc + B + H + L, 
                     ~ Fl + Fl:loc + s(A) + loc + B + H + L, 
                     ~ Fl + Fl:loc + s(A) + loc + B + H + L, 

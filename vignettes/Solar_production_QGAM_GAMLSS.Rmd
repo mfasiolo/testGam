@@ -186,7 +186,6 @@ grid.arrange(grobs = plts)
 
 <!-- We fit a `shash` model, which seems to do better: -->
 <!-- ```{r dbbmi13, message = F} -->
-<!-- library(mgcFam) -->
 <!-- fitShash <- gamV(list(logprod ~ dow + te(Posan, Instant, bs= c("cc", "cc"), k = c(5, 15)), -->
 <!--                       ~ dow + te(Posan, Instant, bs= c("cc", "cc"), k = c(5, 5)),  -->
 <!--                       ~ 1,  -->

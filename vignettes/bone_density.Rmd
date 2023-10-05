@@ -71,4 +71,4 @@ Difficult to say by staring at the two effects above, better to plot the differe
 ```{r bone5362652, message = F}
 plotDiff(sm(m4, 1), sm(m4, 2)) + l_fitLine() + l_ciLine()
 ```
-There might actually be a difference: BMD increases faster in the group taking the supplement, and the effect might be levelling off after 12 years of age.
+There might actually be a difference: BMD increases faster in the group taking the supplement, and the effect might be leveling off after 12 years of age.

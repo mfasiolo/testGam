@@ -5,7 +5,6 @@ Authors@R: c(person("Matteo", "Fasiolo", email = "matteo.fasiolo@gmail.com", rol
              person("Simon", "N. Wood", role = c("ctb")))
 Description: Testing mgcViz and qgam
 Imports: mgcViz (>= 0.1.4), 
-         mgcFam, 
          gamair, 
          e1071, 
          languageR,

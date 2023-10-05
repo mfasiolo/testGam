@@ -95,7 +95,6 @@ check1D(fit3, "age") + l_gridCheck1D(gridFun = skewness)
 ```
 
 ```{r dbbmi11, message = F}
-library(mgcFam)
 fit4 <- gamV(list(bmi ~ s(age, k = 20, bs = "ad"), ~ s(age, k = 20), ~ s(age), ~ 1), 
              data = dbbmi, family = shash, aViz = list(nsim = 50))
 

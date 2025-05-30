@@ -69,6 +69,6 @@ print(plot(m4, select = 1:2), pages = 1)
 ```
 Difficult to say by staring at the two effects above, better to plot the difference between the two smooths directly:
 ```{r bone5362652, message = F}
-plotDiff(sm(m4, 1), sm(m4, 2)) + l_fitLine() + l_ciLine()
+plotDiff(sm(m4, 1), sm(m4, 2))
 ```
 There might actually be a difference: BMD increases faster in the group taking the supplement, and the effect might be leveling off after 12 years of age.

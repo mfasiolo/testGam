@@ -79,13 +79,13 @@ print(plot(fitM, select = c(1, 2, 4)), pages = 1)
 
 summary(fitM[[9]])
 ```
-It seems that the effect of `NAO` is very weak for extreme quantiles, however the reason for this might simply be that the data is quite sparse in the tails. Also, the effect of `year` seems to be highly non-linear for quantile 0.9, but `summary` shows that this effect is not significant. 
+The effect of `year` seems to be highly non-linear for quantile 0.9, but `summary` shows that this effect is not significant. 
 
 We can also plot the spatial effect:
 ```{r rus626}
 print(plot(fitM, select = 3), pages = 1)
 ```
-Interestingly the spatial effect is much stronger for high quantiles (extreme rainfall) than for the low ones. For quantile 0.9 the spatial effect varies between +50mm in the Canton of Ticino and -40mm in the Canton of Grisons. 
+As expected, the spatial effect is much stronger for high quantiles (extreme rainfall) than for the low ones. For quantile 0.9 the spatial effect varies between +50mm in the Canton of Ticino and -30mm in the Canton of Grisons. 
 
 Finally we can see how the climate region effect changes depending on the quantile of interest:
 ```{r rus72547, fig.width = 8.5, fig.height = 5}

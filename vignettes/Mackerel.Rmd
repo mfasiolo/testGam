@@ -33,7 +33,7 @@ data("mack")
 data("coast")
 
 ## plot data....
-with(mack,plot(lon,lat,cex=0.2+egg.dens/150,col="red"))
+with(mack,plot(lon,lat,cex=0.2+egg.count/50,col="red"))
 lines(coast)
 ind <- c(1,3,4,5,10,11,16)
 pairs(mack[,ind])
@@ -52,7 +52,7 @@ fit1 <- gamV(egg.count ~  s(c.dist) + s(I(b.depth^0.5)) + s(temp.surf) + s(temp.
 qq(fit1)
 ```
 does not look good at all, the residuals are over dispersed. Maybe negative binomial is better:
-```{r mack3, message = F}
+```{r mack3, message = F, fig.width = 4, fig.height = 4}
 fit2 <- gamV(egg.count ~  s(c.dist) + s(I(b.depth^0.5)) + s(temp.surf) + s(temp.20m) + 
                           s(lat) + s(lon) + s(salinity) +
                           offset(log.net.area), data = mack, family = nb)

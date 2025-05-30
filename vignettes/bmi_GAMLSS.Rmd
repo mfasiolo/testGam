@@ -90,8 +90,7 @@ Indeed, using an adaptive smooth made sense here.
 
 4) Check skewness:
 ```{r dbbmi10, message = F}
-library(e1071)
-check1D(fit3, "age") + l_gridCheck1D(gridFun = skewness)
+check1D(fit3, "age") + l_gridCheck1D(gridFun = function(x) mean(x^3))
 ```
 
 ```{r dbbmi11, message = F}

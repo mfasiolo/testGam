@@ -10,14 +10,11 @@ Depends:
 Imports: mgcViz (>= 0.1.11), 
          gamair, 
          e1071, 
-         languageR,
-         gamlss.data, 
-         gridExtra, 
          hexbin
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.3.2
 Suggests: RhpcBLASctl, 
           knitr, 
           rmarkdown, 

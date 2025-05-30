@@ -84,8 +84,8 @@ qq(fit3)
 ```
 It is skewed to the right. Let's look at skewness as a function of the covariates:
 ```{r dbbmi9, message = F}
-library(e1071)
-pl <- check1D(fit3, list("Fl", "A", "B", "H", "L", "loc")) + l_gridCheck1D(gridFun = skewness)
+pl <- check1D(fit3, list("Fl", "A", "B", "H", "L", "loc")) + 
+  l_gridCheck1D(gridFun = function(x) mean(x^3))
 print(pl, pages = 1)
 ```
 
@@ -101,7 +101,8 @@ AIC(fit3, fit4)
 ```
 Seems to improve things in terms of AIC. Lets re-check the skewness:
 ```{r dbbmi11, message = F}
-pl <- check1D(fit4, list("Fl", "A", "B", "H", "L", "loc")) + l_gridCheck1D(gridFun = skewness)
+pl <- check1D(fit4, list("Fl", "A", "B", "H", "L", "loc")) + 
+  l_gridCheck1D(gridFun = function(x) mean(x^3))
 print(pl, pages = 1)
 ```
 Looks better (notice that `l_gridCheck1D` by default uses 80\% intervals). Final check:
@@ -109,11 +110,11 @@ Looks better (notice that `l_gridCheck1D` by default uses 80\% intervals). Final
 check(fit4)
 ```
 
-Residuals distribution looks good, maybe we should increase `k` for the year of construction effect `A`:
+Residuals distribution looks good, these are the smooth effects:
 ```{r dbbmi13, message = F}
 print(plot(fit4), pages = 1)
 ```
-Increasing `k` does not seem reasonable, especially for skewness where this effect is not significant:
+and the output of `summary`:
 ```{r dbbmi14, message = F}
 summary(fit4)
 ```

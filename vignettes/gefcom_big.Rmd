@@ -54,7 +54,7 @@ The p-values of `wM`, `wM_s95` and `Instant` are not low, but the Effective Degr
 pl <- check1D(fit1, x = list("NetDemand.24", "wM", "wM_s95", "Instant")) + l_gridCheck1D(n = 40)
 print(pl, pages = 1)
 ```
-There is clearly a systematic pattern along `NetDemand.24`, we should clearly use a smooth effect for this variable! Also, `wM` and `wM_s95` show large but irregular deviations,  while along `Instant` we see large deviations during the night (roughly 8am and 6pm).
+There is clearly a systematic pattern along `NetDemand.24`, we should clearly use a smooth effect for this variable! Also, `wM` and `wM_s95` show large but irregular deviations,  while along `Instant` we see large deviations during the night.
 
 3. Re-fit with larger bases, re-check and look for interactions
 ```{r bam4, message = F}
@@ -177,4 +177,4 @@ pl <- check2D(fit3,
 print(pl, pages = 1)
 ```
 
-These plots show that there are some isolated, but large, negative outliers (standardized skewness $\approx -15$). Such drops in demand might be related to public holidays. If we overlook those points, it is quite clear that the residuals are positively skewed, especially in the winter and at low temperatures. We might be able to take this (and the variance) pattern into account using a GAMLSS model (e.g. usign the `gaulss` or `shash` families). But this would take longer to fit, because `bam` is unavailable for such models.
+These plots show that there are some isolated, but large, negative outliers (standardized skewness $\approx -15$). Such drops in demand might be related to public holidays. If we overlook those points, it is quite clear that the residuals are positively skewed, especially in the winter and at low temperatures. We might be able to take this (and the variance) pattern into account using a GAMLSS model (e.g. using the `gaulss` or `shash` families). But this would take longer to fit, because `bam` is unavailable for such models.
